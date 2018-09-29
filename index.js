@@ -2,8 +2,24 @@ const cloudinary = require("cloudinary");
 const express = require("express");
 const axios = require("axios");
 const Jimp = require("jimp");
+const fileUpload = require("express-fileupload");
+
 const app = express();
+app.use(fileUpload());
 require("dotenv").config();
+
+const colors = {
+  black: [
+    Jimp.FONT_SANS_16_BLACK,
+    Jimp.FONT_SANS_32_BLACK,
+    Jimp.FONT_SANS_64_BLACK
+  ],
+  white: [
+    Jimp.FONT_SANS_16_WHITE,
+    Jimp.FONT_SANS_32_WHITE,
+    Jimp.FONT_SANS_64_WHITE
+  ]
+};
 
 cloudinary.config({
   cloud_name: process.env.cloud_name,
@@ -13,6 +29,10 @@ cloudinary.config({
 
 app.get("/tag_image", async (req, res) => {
   const { url, textColor } = req.query;
+  getQuotedMeme(url, textColor, res);
+});
+
+function getQuotedMeme(url, textColor, res) {
   cloudinary.v2.uploader.upload(
     url,
     { categorization: "aws_rek_tagging", auto_tagging: 0.5 },
@@ -37,20 +57,27 @@ app.get("/tag_image", async (req, res) => {
       }
     }
   );
-});
+}
 
-const colors = {
-  black: [
-    Jimp.FONT_SANS_16_BLACK,
-    Jimp.FONT_SANS_32_BLACK,
-    Jimp.FONT_SANS_64_BLACK
-  ],
-  white: [
-    Jimp.FONT_SANS_16_WHITE,
-    Jimp.FONT_SANS_32_WHITE,
-    Jimp.FONT_SANS_64_WHITE
-  ]
-};
+app.post("/upload_image", function(req, res) {
+  if (!req.files) {
+    return res.status(400).send("No files were uploaded.");
+  }
+  const imageBuf = req.files.image.data;
+  const { textColor } = req.query;
+
+  cloudinary.v2.uploader
+    .upload_stream({ resource_type: "raw" }, function(error, result) {
+      if (!error) {
+        console.log(result);
+
+        getQuotedMeme(result.url, textColor, res);
+      } else {
+        console.log(error);
+      }
+    })
+    .end(imageBuf);
+});
 
 function addQuouteToImage(text, url, textColor = "black") {
   return new Promise(async function(resolve, reject) {
@@ -68,8 +95,10 @@ function addQuouteToImage(text, url, textColor = "black") {
     const jimpOptions = {
       text,
       alignmentX: Jimp.HORIZONTAL_ALIGN_CENTER,
-      alignmentY: Jimp.VERTICAL_ALIGN_BOTTOM
+      alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE
     };
+
+    await jimpImage.resize(500, Jimp.AUTO);
     await jimpImage.print(font, 25, 0, jimpOptions, 450, 500);
     const buf = await jimpImage.getBufferAsync(Jimp.MIME_JPEG);
     cloudinary.v2.uploader
