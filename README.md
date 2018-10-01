@@ -1,6 +1,6 @@
 # memage-api
 
-## Backend for the WWCHackathon2018 Second place winner app MEMAGE.
+## Backend for the [WWCHackathon2018](https://www.meetup.com/Women-Who-Code-Silicon-Valley/events/252695639/) Second place winner app MEMAGE.
 
 The app might have reached the limits of the cloudinary api, so it might not work: https://memage.herokuapp.com
 
