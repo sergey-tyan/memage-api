@@ -2,6 +2,8 @@
 
 ## Backend for the WWCHackathon2018 Second place winner app MEMAGE.
 
+The app might have reached the limits of the cloudinary api, so it might not work: https://memage.herokuapp.com
+
 Original idea:
 
 1) Take a picture.
@@ -9,7 +11,7 @@ Original idea:
 3) Search the web with for funny quotes with tags from the image (we are using https://quotes.rest/).
 4) Attach the quote to the image.
 
-## Usage:
+## To run the app locally:
 You will need Cloudinary and quotes.rest keys to to run the application. 
 
 ![](https://i.imgur.com/trTjQxt.png)
